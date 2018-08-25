@@ -1,0 +1,8 @@
+{
+  "extends": ["airbnb/base", "plugin:promise/recommended"],
+  "plugins": ["promise", "mocha"],
+  "env": {
+    "mocha": true
+  },
+  "rules": {}
+}

@@ -26,9 +26,21 @@ provider:
   #environment: ${file(env.yml):${self:provider.stage}}
 
 functions:
-  hello:
-    handler: handler.hello
+  api/v1/pdfs/create:
+    handler: handlers/api/v1/pdfs/create.default
     events:
       - http:
-          path: hello
-          method: get
+          path: pdf/create
+          method: post
+  api/v1/pdfs/page:
+    handler: handlers/api/v1/pdfs/page.default
+    events:
+      - http:
+          path: pdf/page
+          method: post
+  api/v1/pdfs/compile:
+    handler: handlers/api/v1/pdfs/compile.default
+    events:
+      - http:
+          path: pdf/compile
+          method: post
