@@ -6,6 +6,10 @@ plugins:
   - serverless-webpack
   - serverless-offline
 
+package:
+  include:
+    - bin/phantomjs
+
 # serverless-webpack configuration
 # Enable auto-packing of external modules
 custom:
@@ -26,20 +30,20 @@ provider:
   #environment: ${file(env.yml):${self:provider.stage}}
 
 functions:
-  api/v1/pdfs/create:
-    handler: handlers/api/v1/pdfs/create.default
+  pdfs/create:
+    handler: app/handlers/pdfs/create.default
     events:
       - http:
           path: pdf/create
           method: post
-  api/v1/pdfs/page:
-    handler: handlers/api/v1/pdfs/page.default
+  pdfs/page:
+    handler: app/handlers/pdfs/page.default
     events:
       - http:
           path: pdf/page
           method: post
-  api/v1/pdfs/compile:
-    handler: handlers/api/v1/pdfs/compile.default
+  pdfs/compile:
+    handler: app/handlers/pdfs/compile.default
     events:
       - http:
           path: pdf/compile
