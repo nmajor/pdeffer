@@ -1,9 +1,10 @@
 import fs from 'fs';
 import * as pdf from '../app/lib/pdf';
 
+const sampleFile = './run/samples/create.html';
 const config = {};
 
-function run(filename = './run/samples/test.html') {
+function run(filename = sampleFile) {
   fs.readFile(filename, 'utf8', (err, data) => {
     if (err) { return console.error(err); }
 

@@ -1,5 +1,7 @@
+import fs from 'fs';
 import pdf from 'html-pdf';
 import path from 'path';
+import pdfjs from 'pdfjs-dist';
 
 function phantomPath() {
   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
@@ -18,14 +20,18 @@ const defaultPdfOptions = {
   },
 };
 
-export function toFile(html, filename, customOptions = {}) {
-  const options = { ...defaultPdfOptions, ...customOptions };
+function withMeta(buffer) {
+  return pdfjs.getDocument(buffer).then(doc => Promise.resolve({ ...doc.pdfInfo, buffer }));
+}
 
+function saveFile(filename, results) {
   return new Promise((resolve, reject) => {
-    pdf.create(html, options).toFile(filename, (err, res) => {
+    fs.writeFile(filename, results.buffer, (err) => {
       if (err) return reject(err);
 
-      return resolve(res);
+      delete results.buffer; // eslint-disable-line no-param-reassign
+
+      return resolve({ ...results, filename });
     });
   });
 }
@@ -39,7 +45,15 @@ export function toBuffer(html, customOptions = {}) {
 
       return resolve(buffer);
     });
-  });
+  })
+    .then(withMeta);
+}
+
+export function toFile(html, filename, customOptions = {}) {
+  const options = { ...defaultPdfOptions, ...customOptions };
+
+  return toBuffer(html, options)
+    .then(results => saveFile(filename, results));
 }
 
 export default null;
