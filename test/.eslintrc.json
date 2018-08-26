@@ -4,5 +4,8 @@
   "env": {
     "mocha": true
   },
-  "rules": {}
+  "rules": {
+    "promise/no-callback-in-promise": 0,
+    "no-unused-expressions": 0
+  }
 }

@@ -2,9 +2,16 @@ import fs from 'fs';
 import pdf from 'html-pdf';
 import path from 'path';
 import pdfjs from 'pdfjs-dist';
+import crypto from 'crypto';
 
 function phantomPath() {
   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
+}
+
+export function bufferToSha1(buffer) {
+  const hash = crypto.createHash('sha1');
+  hash.update(buffer);
+  return hash.digest('hex');
 }
 
 const defaultPdfOptions = {
@@ -21,7 +28,11 @@ const defaultPdfOptions = {
 };
 
 function withMeta(buffer) {
-  return pdfjs.getDocument(buffer).then(doc => Promise.resolve({ ...doc.pdfInfo, buffer }));
+  return pdfjs.getDocument(buffer).then(doc => Promise.resolve({
+    buffer,
+    pageCount: doc.pdfInfo.numPages,
+    sha1: bufferToSha1(buffer),
+  }));
 }
 
 function saveFile(filename, results) {

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "serverless offline start",
     "test": "NODE_ENV=test node_modules/.bin/mocha --recursive --require babel-core/register",
+    "test:watch": "NODE_ENV=test nodemon --exec 'node_modules/.bin/mocha --recursive --require babel-core/register -R min --exit'",
     "lint": "node_modules/.bin/eslint .",
     "run:createPdf": "node_modules/.bin/babel-node run/createPdf.js"
   },
@@ -29,6 +30,7 @@
     "eslint-plugin-mocha": "^5.2.0",
     "eslint-plugin-promise": "^4.0.0",
     "mocha": "^5.2.0",
+    "nodemon": "^1.18.3",
     "serverless-offline": "^3.25.6",
     "serverless-webpack": "^5.1.0",
     "webpack": "^4.16.2",
