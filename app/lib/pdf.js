@@ -3,6 +3,7 @@ import pdf from 'html-pdf';
 import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
+import uuid from 'uuid/v4';
 
 function phantomPath() {
   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
@@ -29,20 +30,21 @@ const defaultPdfOptions = {
 
 function withMeta(buffer) {
   return pdfjs.getDocument(buffer).then(doc => Promise.resolve({
+    identifier: uuid(),
     buffer,
     pageCount: doc.pdfInfo.numPages,
     sha1: bufferToSha1(buffer),
   }));
 }
 
-function saveFile(filename, results) {
+function saveFile(file, results) {
   return new Promise((resolve, reject) => {
-    fs.writeFile(filename, results.buffer, (err) => {
+    fs.writeFile(file, results.buffer, (err) => {
       if (err) return reject(err);
 
       delete results.buffer; // eslint-disable-line no-param-reassign
 
-      return resolve({ ...results, filename });
+      return resolve({ ...results, file });
     });
   });
 }
@@ -60,11 +62,11 @@ export function toBuffer(html, customOptions = {}) {
     .then(withMeta);
 }
 
-export function toFile(html, filename, customOptions = {}) {
+export function toFile(html, file, customOptions = {}) {
   const options = { ...defaultPdfOptions, ...customOptions };
 
   return toBuffer(html, options)
-    .then(results => saveFile(filename, results));
+    .then(results => saveFile(file, results));
 }
 
 export default null;

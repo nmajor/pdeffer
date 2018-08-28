@@ -23,10 +23,10 @@ describe('toFile', () => {
         .then((res) => {
           expect(res.pageCount).to.equal(1);
           expect(typeof (res.sha1)).to.equal('string');
-          expect(res.filename).to.equal(resultFile);
+          expect(res.file).to.equal(resultFile);
           expect(res.buffer).to.not.be.ok;
 
-          expect(fs.existsSync(res.filename)).to.be.ok;
+          expect(fs.existsSync(res.file)).to.be.ok;
           return done();
         });
     });
@@ -42,7 +42,7 @@ describe('toBuffer', () => {
         .then((res) => {
           expect(res.pageCount).to.equal(1);
           expect(typeof (res.sha1)).to.equal('string');
-          expect(res.filename).to.not.be.ok;
+          expect(res.file).to.not.be.ok;
           return done();
         });
     });

@@ -42,6 +42,7 @@
     "html-pdf": "^2.2.0",
     "pdfjs-dist": "^2.0.489",
     "shortid": "^2.2.13",
-    "source-map-support": "^0.4.18"
+    "source-map-support": "^0.4.18",
+    "uuid": "^3.3.2"
   }
 }

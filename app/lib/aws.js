@@ -1,3 +1,5 @@
+import fs from 'fs';
+import uuid from 'uuid/v4';
 import AWS from 'aws-sdk';
 // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html
 
@@ -31,6 +33,29 @@ export function uploadBuffer(buffer, filename, meta) {
   });
 }
 
-// export function uploadPdfObject(pdfObj) {}
+export function uploadFile(filePath, filename, meta) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filePath, (err, buffer) => {
+      if (err) return reject(err);
+      return resolve(buffer);
+    });
+  }).then(buffer => uploadBuffer(buffer, filename, meta));
+}
 
-export function uploadFile() {}
+export function uploadPdfObject({ buffer, file, ...meta }) {
+  const data = { ...meta };
+  const filename = `${uuid()}/base.pdf`;
+
+  meta.pageCount = meta.pageCount.toString(); // eslint-disable-line
+
+  let tasks = Promise.resolve();
+  if (buffer) {
+    tasks = tasks.then(() => uploadBuffer(buffer, filename, meta));
+  } else if (file) {
+    tasks = tasks.then(() => uploadFile(file, filename, meta));
+  } else {
+    return Promise.reject(new Error('Invalid pdf object.'));
+  }
+
+  return tasks.then(url => ({ ...data, url }));
+}
