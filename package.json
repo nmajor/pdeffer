@@ -37,7 +37,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.302.0",
+    "aws-sdk": "^2.304.0",
     "babel-runtime": "^6.26.0",
     "html-pdf": "^2.2.0",
     "pdfjs-dist": "^2.0.489",

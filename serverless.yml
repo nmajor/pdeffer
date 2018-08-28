@@ -28,21 +28,27 @@ provider:
   # commit your env.yml.
   #
   #environment: ${file(env.yml):${self:provider.stage}}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+       - "s3:PutObject"
+       - "s3:DeleteObject"
+      Resource: { "Fn::Join": ["", ["arn:aws:s3:::pdf-shop-uploads", "/*" ] ] }
 
 functions:
-  pdfs/create:
+  pdfsCreate:
     handler: app/handlers/pdfs/create.default
     events:
       - http:
           path: pdf/create
           method: post
-  pdfs/page:
+  pdfsPage:
     handler: app/handlers/pdfs/page.default
     events:
       - http:
           path: pdf/page
           method: post
-  pdfs/compile:
+  pdfsCompile:
     handler: app/handlers/pdfs/compile.default
     events:
       - http:
