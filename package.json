@@ -4,7 +4,7 @@
   "description": "A Node.js starter for the Serverless Framework with async/await and unit test support",
   "main": "handler.js",
   "scripts": {
-    "start": "serverless offline start",
+    "start": "NODE_ENV=dev serverless offline start",
     "test": "NODE_ENV=test node_modules/.bin/mocha --recursive --require babel-core/register",
     "test:watch": "NODE_ENV=test nodemon --exec 'node_modules/.bin/mocha --recursive --require babel-core/register -R min --exit'",
     "lint": "node_modules/.bin/eslint .",
@@ -39,6 +39,7 @@
   "dependencies": {
     "aws-sdk": "^2.304.0",
     "babel-runtime": "^6.26.0",
+    "html-minifier": "^3.5.20",
     "html-pdf": "^2.2.0",
     "pdfjs-dist": "^2.0.489",
     "shortid": "^2.2.13",

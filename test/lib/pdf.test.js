@@ -16,10 +16,10 @@ describe('toFile', () => {
   it('builds a pdf FILE with metadata', (done) => {
     expect(fs.existsSync(resultFile)).to.not.be.ok;
 
-    fs.readFile(sampleFile, 'utf8', (err, buffer) => {
+    fs.readFile(sampleFile, 'utf8', (err, text) => {
       if (err) throw Error(err);
 
-      return pdf.toFile(buffer, resultFile, {})
+      return pdf.toFile(text, resultFile, {})
         .then((res) => {
           expect(res.pageCount).to.equal(1);
           expect(typeof (res.sha1)).to.equal('string');
@@ -35,10 +35,10 @@ describe('toFile', () => {
 
 describe('toBuffer', () => {
   it('builds a pdf BUFFER with metadata', (done) => {
-    fs.readFile(sampleFile, 'utf8', (err, buffer) => {
+    fs.readFile(sampleFile, 'utf8', (err, text) => {
       if (err) throw Error(err);
 
-      return pdf.toBuffer(buffer, {})
+      return pdf.toBuffer(text, {})
         .then((res) => {
           expect(res.pageCount).to.equal(1);
           expect(typeof (res.sha1)).to.equal('string');

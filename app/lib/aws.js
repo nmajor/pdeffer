@@ -8,6 +8,7 @@ const bucket = 'pdf-shop-uploads';
 function namespace() {
   const ns = 'pdfs';
   if (process.env.NODE_ENV === 'test') return `test/${ns}`;
+  if (process.env.NODE_ENV === 'dev') return `dev/${ns}`;
   return ns;
 }
 

@@ -1,15 +1,19 @@
-// import pdf from 'html-pdf';
-// import path from 'path';
-// import shortid from 'shortid';
-// import AWS from 'aws-sdk';
+import * as pdf from '../../lib/pdf';
+import * as aws from '../../lib/aws';
+import errors from '../../lib/errors';
+import response from '../../lib/response';
 
 export default (event, context, callback) => {
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: 'Hello from pdfs/create',
-    }),
-  };
+  const { html, options = {} } = event.body;
 
-  callback(null, response);
+  if (!html) {
+    callback(null, errors.missingParameters(['html']));
+  }
+
+  return pdf.toBuffer(html, options)
+    .then(aws.uploadPdfObject)
+    .then(result => callback(null, response.ok(result)))
+    .catch(err => errors.internalServer(err));
+
+  // callback(null, response.ok());
 };
