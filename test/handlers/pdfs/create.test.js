@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import fs from 'fs';
-import { minify } from 'html-minifier';
 
 import handler from '../../../app/handlers/pdfs/create';
 
@@ -27,11 +26,7 @@ describe('Create a PDF', () => {
   it('returns a valid response', (done) => {
     fs.readFile(sampleFile, 'utf8', (err, text) => {
       const data = {
-        html: minify(text, {
-          maxLineLength: true,
-          collapseWhitespace: true,
-          minifyCSS: true,
-        }),
+        html: text,
         options: {},
       };
 
