@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import handler from '../../../app/handlers/pdfs/compile';
+import { compile as handler } from '../../../app/handlers/pdfs';
 
 describe('Compile a PDF', () => {
   it('returns a valid response', (done) => {

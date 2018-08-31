@@ -1,10 +1,9 @@
 import { expect } from 'chai';
 import fs from 'fs';
 
-import handler from '../../../app/handlers/pdfs/create';
+import { create as handler } from '../../../app/handlers/pdfs';
 
-const sampleFile = `${__dirname}/../../samples/create.html`;
-
+const sampleFile = `${__dirname}/../../samples/sample.html`;
 
 describe('Create a PDF', () => {
   it('returns 422 error when html param is missing', (done) => {
@@ -37,11 +36,19 @@ describe('Create a PDF', () => {
         const body = JSON.parse(response.body);
 
         expect(response.statusCode).to.equal(200);
-        console.log('blah response', body);
+        expect(body.url).to.be.ok;
+        expect(body.url).to.include('https');
+        expect(body.meta).to.be.ok;
+        expect(body.meta.sha1).to.be.ok;
+        expect(body.meta.sha1).to.be.a('string');
+        expect(body.meta.size).to.be.ok;
+        expect(body.meta.size).to.be.a('string');
+        expect(body.meta.pageCount).to.be.ok;
+        expect(body.meta.pageCount).to.be.a('string');
         done();
       };
 
       handler(event, context, callback);
     });
-  }).timeout(20000);
+  }).timeout(60000);
 });

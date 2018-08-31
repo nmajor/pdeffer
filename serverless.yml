@@ -37,20 +37,20 @@ provider:
 
 functions:
   pdfsCreate:
-    handler: app/handlers/pdfs/create.default
+    handler: app/handlers/pdfs.create
     events:
       - http:
-          path: pdf/create
+          path: api/pdf/create
           method: post
   pdfsPage:
-    handler: app/handlers/pdfs/page.default
+    handler: app/handlers/pdfs/page
     events:
       - http:
-          path: pdf/page
+          path: api/pdf/page
           method: post
   pdfsCompile:
-    handler: app/handlers/pdfs/compile.default
+    handler: app/handlers/pdfs/compile
     events:
       - http:
-          path: pdf/compile
+          path: api/pdf/compile
           method: post

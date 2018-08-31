@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import handler from '../../../app/handlers/pdfs/page';
+import { pagify as handler } from '../../../app/handlers/pdfs';
 
 describe('Add page numbers to file', () => {
   it('returns a valid response', (done) => {

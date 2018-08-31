@@ -3,7 +3,6 @@ import pdf from 'html-pdf';
 import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
-import uuid from 'uuid/v4';
 
 function phantomPath() {
   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
@@ -13,6 +12,14 @@ export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
   hash.update(buffer);
   return hash.digest('hex');
+}
+
+export function metaFromBuffer(buffer) {
+  return pdfjs.getDocument(buffer).then(doc => ({
+    pageCount: doc.pdfInfo.numPages,
+    sha1: bufferToSha1(buffer),
+    size: buffer.byteLength,
+  }));
 }
 
 const defaultPdfOptions = {
@@ -28,23 +35,12 @@ const defaultPdfOptions = {
   },
 };
 
-function withMeta(buffer) {
-  return pdfjs.getDocument(buffer).then(doc => Promise.resolve({
-    identifier: uuid(),
-    buffer,
-    pageCount: doc.pdfInfo.numPages,
-    sha1: bufferToSha1(buffer),
-  }));
-}
-
-function saveFile(file, results) {
+function saveFile(file, buffer) {
   return new Promise((resolve, reject) => {
-    fs.writeFile(file, results.buffer, (err) => {
+    fs.writeFile(file, buffer, (err) => {
       if (err) return reject(err);
 
-      delete results.buffer; // eslint-disable-line no-param-reassign
-
-      return resolve({ ...results, file });
+      return resolve(file);
     });
   });
 }
@@ -58,8 +54,7 @@ export function toBuffer(html, customOptions = {}) {
 
       return resolve(buffer);
     });
-  })
-    .then(withMeta);
+  });
 }
 
 export function toFile(html, file, customOptions = {}) {
@@ -67,6 +62,22 @@ export function toFile(html, file, customOptions = {}) {
 
   return toBuffer(html, options)
     .then(results => saveFile(file, results));
+}
+
+export function toPdfObj(data) {
+  return new Promise((resolve, reject) => {
+    if (typeof data === 'string') {
+      return fs.readFile(data, (err, buffer) => {
+        if (err) reject(err);
+
+        return metaFromBuffer(buffer)
+          .then(meta => resolve({ file: data, meta }));
+      });
+    }
+
+    return metaFromBuffer(data)
+      .then(meta => resolve({ buffer: data, meta }));
+  });
 }
 
 export default null;

@@ -39,6 +39,7 @@
   "dependencies": {
     "aws-sdk": "^2.304.0",
     "babel-runtime": "^6.26.0",
+    "download": "^7.1.0",
     "html-pdf": "^2.2.0",
     "pdfjs-dist": "^2.0.489",
     "shortid": "^2.2.13",

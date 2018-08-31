@@ -20,6 +20,9 @@ export function uploadBuffer(buffer, filename, meta) {
   return new Promise((resolve, reject) => {
     const key = `${namespace()}/${filename}`;
 
+    meta.pageCount = meta.pageCount.toString(); // eslint-disable-line
+    meta.size = meta.size.toString(); // eslint-disable-line
+
     const s3 = new AWS.S3();
     s3.putObject({
       Bucket: bucket,
@@ -29,7 +32,7 @@ export function uploadBuffer(buffer, filename, meta) {
       Metadata: meta,
     }, (err) => {
       if (err) reject(err);
-      resolve(objectUrl(key));
+      resolve({ url: objectUrl(key), key });
     });
   });
 }
@@ -43,11 +46,8 @@ export function uploadFile(filePath, filename, meta) {
   }).then(buffer => uploadBuffer(buffer, filename, meta));
 }
 
-export function uploadPdfObject({ buffer, file, ...meta }) {
-  const data = { ...meta };
-  const filename = `${uuid()}/base.pdf`;
-
-  meta.pageCount = meta.pageCount.toString(); // eslint-disable-line
+export function uploadPdfObject({ buffer, file, meta }) {
+  const filename = `${uuid()}.pdf`;
 
   let tasks = Promise.resolve();
   if (buffer) {
@@ -58,5 +58,5 @@ export function uploadPdfObject({ buffer, file, ...meta }) {
     return Promise.reject(new Error('Invalid pdf object.'));
   }
 
-  return tasks.then(url => ({ ...data, url }));
+  return tasks.then(results => ({ ...results, meta }));
 }

@@ -48,6 +48,8 @@ Session.vim
 env.yml
 .env
 
+tmp/*
+
 # Jetbrains IDEs
 .idea
 

@@ -7,7 +7,7 @@ import * as aws from '../../app/lib/aws';
 const sampleFile = `${__dirname}/../samples/upload.pdf`;
 const sampleMeta = {};
 
-describe('uploadBuffer', () => {
+describe('lib/aws.uploadBuffer', () => {
   it('uploads a file BUFFER to s3 with metadata', (done) => {
     fs.readFile(sampleFile, (err, buffer) => {
       if (err) throw Error(err);
@@ -23,7 +23,7 @@ describe('uploadBuffer', () => {
   }).timeout(20000);
 });
 
-describe('uploadFile', () => {
+describe('lib/aws.uploadFile', () => {
   it('uploads a FILE to s3 with metadata', () => {
     const filename = `${uuid()}/base.pdf`;
     return aws.uploadFile(sampleFile, filename, sampleMeta)
@@ -35,7 +35,7 @@ describe('uploadFile', () => {
   }).timeout(20000);
 });
 
-describe('uploadPdfObject', () => {
+describe('lib/aws.uploadPdfObject', () => {
   it('uploads a FILE pdfObj', () => {
     const pdfObj = {
       sha1: '94ffc5e4378a2ed257063bda0ad94446b460ae84',
