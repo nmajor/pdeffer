@@ -64,6 +64,7 @@ describe('lib/pdf.toPdfObj', () => {
   it('builds pdfObj from filepath', (done) => {
     pdf.toPdfObj(samplePdfFile)
       .then((res) => {
+        console.log('blah here meta', res.meta);
         expect(res.file).to.be.ok;
         expect(res.file).to.equal(samplePdfFile);
         expect(res.meta.pageCount).to.equal(1);

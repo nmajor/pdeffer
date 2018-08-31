@@ -42,14 +42,20 @@ functions:
       - http:
           path: api/pdf/create
           method: post
-  pdfsPage:
-    handler: app/handlers/pdfs/page
+  pdfsAddPageNumbers:
+    handler: app/handlers/pdfs.addPageNumbers
     events:
       - http:
-          path: api/pdf/page
+          path: api/pdf/add-page-numbers
+          method: post
+  addGutterMargins:
+    handler: app/handlers/pdfs.addGutterMargins
+    events:
+      - http:
+          path: api/pdf/add-gutter-margins
           method: post
   pdfsCompile:
-    handler: app/handlers/pdfs/compile
+    handler: app/handlers/pdfs.compile
     events:
       - http:
           path: api/pdf/compile
