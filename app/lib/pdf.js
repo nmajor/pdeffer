@@ -12,6 +12,10 @@ function phantomPath() {
   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
 }
 
+function pdfLatexPath() {
+  return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/pdflatex') : 'pdflatex';
+}
+
 export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
   hash.update(buffer);
@@ -97,26 +101,49 @@ export function toPdfObj(data) {
   });
 }
 
-export function pagifyFile(pdfFile, startingPage) {
-  const latexTemplatePath = `${__dirname}../../latex/page_numbering.tex`;
-  const latexPath = `${download.dir}/page_numbering.tex`;
+export function addPageNumbers(pdfObj, startingPage, { destination = download.dir }) {
+  const latexTemplatePath = `${__dirname}/../../latex/page_numbering.tex`;
+  const latexPath = `${destination}/page_numbering.tex`;
 
-  return toPdfObj(pdfFile)
-    .then((pdfObj) => {
-      const latexTemplateText = fs.readFileSync(latexTemplatePath, 'utf8');
+  let footerPosition = 'LO,RE';
+  if (pdfObj.pageCount % 2 === 0) {
+    footerPosition = 'LE,RO';
+  }
 
-      const latexText = latexTemplateText
-        .replace('STARTING_PAGE', startingPage)
-        .replace('FOOTER_POSITIONS', this.getFooterPositions(startingPage))
-        .replace('PDF_PATH', pdfFile)
-        .replace('PDF_HEIGHT', pdfObj.meta.heightIn)
-        .replace('PDF_WIDTH', pdfObj.meta.widthIn)
-        .replace('LEFT_MARGIN', options.get().margin)
-        .replace('RIGHT_MARGIN', options.get().margin);
+  return new Promise((resolve, reject) => {
+    const latexTemplateText = fs.readFileSync(latexTemplatePath, 'utf8');
+    const newFile = pdfObj.file.replace(/\.pdf$/, '-paged');
 
-      fs.writeFileSync(latexPath, latexText);
-      return '';
+    const latexText = latexTemplateText
+      .replace('STARTING_PAGE', startingPage)
+      .replace('FOOTER_POSITIONS', footerPosition)
+      .replace('PDF_PATH', pdfObj.file)
+      .replace('PDF_HEIGHT', pdfObj.meta.heightIn)
+      .replace('PDF_WIDTH', pdfObj.meta.widthIn)
+      .replace('LEFT_MARGIN', options.get().margin)
+      .replace('RIGHT_MARGIN', options.get().margin);
+
+    fs.writeFileSync(latexPath, latexText);
+    const command = `${pdfLatexPath()} -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
+
+    const { spawn } = require('child_process'); // eslint-disable-line global-require
+    const process = spawn('/bin/bash', [
+      '-c',
+      command,
+    ]);
+
+    process.stderr.on('data', (data) => {
+      reject(new Error(data));
     });
+
+    process.on('close', (code) => {
+      if (code === 0) {
+        resolve({ ...pdfObj, file: `${destination}/${newFile}.pdf` });
+      } else {
+        reject(new Error('pdflatex command failed'));
+      }
+    });
+  });
 }
 
 export default null;

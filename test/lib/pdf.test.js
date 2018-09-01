@@ -5,7 +5,9 @@ import * as pdf from '../../app/lib/pdf';
 
 const sampleHtmlFile = `${__dirname}/../samples/sample.html`;
 const samplePdfFile = `${__dirname}/../samples/sample.pdf`;
+const samplePageTestFile = `${__dirname}/../samples/page-test.pdf`;
 const resultFile = `${__dirname}/../results/create.pdf`;
+const resultsDirectory = `${__dirname}/../results`;
 
 describe('lib/pdf.toFile', () => {
   after((done) => {
@@ -64,7 +66,6 @@ describe('lib/pdf.toPdfObj', () => {
   it('builds pdfObj from filepath', (done) => {
     pdf.toPdfObj(samplePdfFile)
       .then((res) => {
-        console.log('blah here meta', res.meta);
         expect(res.file).to.be.ok;
         expect(res.file).to.equal(samplePdfFile);
         expect(res.meta.pageCount).to.equal(1);
@@ -73,5 +74,22 @@ describe('lib/pdf.toPdfObj', () => {
         expect(res.buffer).to.not.be.ok;
         return Promise.resolve();
       }).then(done).catch(done);
+  }).timeout(20000);
+});
+
+describe('lib/pdf.addPageNumbers', () => {
+  it('Add page numbers to a file', (done) => {
+    const staringPage = 5;
+    pdf.toPdfObj(samplePageTestFile)
+      .then(pdfObj => pdf.addPageNumbers(pdfObj, staringPage, { destination: resultsDirectory }))
+      .then((res) => {
+        expect(res.buffer).to.be.ok;
+        expect(res.buffer.byteLength).to.be.above(100);
+        expect(res.meta.pageCount).to.equal(1);
+        expect(res.meta.sha1).to.be.a('string');
+        expect(res.file).to.not.be.ok;
+        return done();
+      }).then(done)
+      .catch(done);
   }).timeout(20000);
 });

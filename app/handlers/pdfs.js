@@ -32,7 +32,10 @@ export const addPageNumbers = (event, context, callback) => {
 
   return download.toFile(url)
     .then(pdf.toPdfObj)
-    .then(pdf.addPageNumbersToFile);
+    .then(pdf.addPageNumbers)
+    .then(aws.uploadPdfObject)
+    .then(result => callback(null, response.ok(result)))
+    .catch(err => errors.internalServer(err));
 };
 
 export const compile = (event, context, callback) => {

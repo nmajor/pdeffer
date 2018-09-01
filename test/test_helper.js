@@ -33,9 +33,8 @@ export function deleteTestObjects() {
 }
 
 export function clearResultsFiles() {
-  const directory = 'test/results';
-
   return new Promise((resolve, reject) => {
+    const directory = 'test/results';
     fs.readdir(directory, (err, files) => {
       if (err) reject(err);
 
@@ -49,6 +48,11 @@ export function clearResultsFiles() {
 }
 
 // eslint-disable-next-line func-names
-before(deleteTestObjects);
+before((done) => {
+  deleteTestObjects()
+    .then(clearResultsFiles)
+    .then(done)
+    .catch(err => console.error(err));
+});
 
 export default null;
