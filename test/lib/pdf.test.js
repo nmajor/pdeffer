@@ -5,9 +5,9 @@ import * as pdf from '../../app/lib/pdf';
 
 const sampleHtmlFile = `${__dirname}/../samples/sample.html`;
 const samplePdfFile = `${__dirname}/../samples/sample.pdf`;
-const samplePageTestFile = `${__dirname}/../samples/page-test.pdf`;
+// const samplePageTestFile = `${__dirname}/../samples/page-test.pdf`;
 const resultFile = `${__dirname}/../results/create.pdf`;
-const resultsDirectory = `${__dirname}/../results`;
+// const resultsDirectory = `${__dirname}/../results`;
 
 describe('lib/pdf.toFile', () => {
   after((done) => {

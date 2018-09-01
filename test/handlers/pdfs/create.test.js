@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import fs from 'fs';
+import { exec } from 'child_process';
 
 import handler from '../../../app/handlers/pdfs/create';
 
@@ -10,6 +11,7 @@ describe('Create a PDF', () => {
     const event = { body: {} };
     const context = 'context';
     const callback = (error, response) => {
+      expect(error).to.not.be.ok;
       const body = JSON.parse(response.body);
       expect(response.statusCode).to.equal(422);
       expect(body.errors).to.be.ok;
@@ -22,20 +24,23 @@ describe('Create a PDF', () => {
     handler(event, context, callback);
   });
 
-  it('returns a valid response', (done) => {
+  it('meeee returns a valid response', (done) => {
     fs.readFile(sampleFile, 'utf8', (err, text) => {
-      const data = {
+      const data = JSON.stringify({
         html: text,
         options: {},
-      };
+      });
 
       if (err) throw Error(err);
       const event = { body: data };
       const context = 'context';
-      const callback = (error, response) => {
-        const body = JSON.parse(response.body);
+      const callback = (error, body) => {
+        console.log('blah hello body', body);
+        console.log('blah hello error', error);
 
-        expect(response.statusCode).to.equal(200);
+
+        expect(body.file).to.not.be.ok;
+        expect(body.buffer).to.not.be.ok;
         expect(body.url).to.be.ok;
         expect(body.url).to.include('https');
         expect(body.meta).to.be.ok;

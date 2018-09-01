@@ -1,11 +1,11 @@
-function missingParameters(params) {
+function unprocessableEntity(details) {
   return {
     statusCode: 422,
     body: JSON.stringify({
       errors: {
         code: 422,
         message: 'Unprocessable Entity',
-        details: `Missing Required Parameters: ${params.join(', ')}`,
+        details,
       },
     }),
   };
@@ -25,6 +25,6 @@ function internalServer(err) {
 }
 
 export default {
-  missingParameters,
-  internalServer
+  unprocessableEntity,
+  internalServer,
 };

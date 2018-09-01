@@ -1,23 +1,25 @@
+import middy from 'middy';
+import {
+  jsonBodyParser,
+} from 'middy/middlewares';
 import * as pdf from '../../lib/pdf';
 import * as aws from '../../lib/aws';
-import errors from '../../lib/errors';
 import response from '../../lib/response';
-import options from '../../options';
+import errors from '../../lib/errors';
+import setOptions from '../../middlewares/setOptions';
 
-export const create = (event, context, callback) => {
-  const { html, opt = {} } = event.body;
+export const create = (event) => {
+  const { html } = event.body;
 
-  if (!html) {
-    callback(null, errors.missingParameters(['html']));
-  }
-
-  options.set(opt);
-
-  return pdf.toBuffer(html, options)
+  return pdf.toBuffer(html)
     .then(pdf.toPdfObj)
     .then(aws.uploadPdfObject)
-    .then(result => callback(null, response.ok(result)))
+    .then(result => response.ok(result))
     .catch(err => errors.internalServer(err));
 };
 
-export default create;
+const handler = middy(create)
+  .use(jsonBodyParser())
+  .use(setOptions());
+
+export default handler;
