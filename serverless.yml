@@ -15,7 +15,9 @@ package:
 custom:
   webpack:
     webpackConfig: ./webpack.config.js
-    includeModules: true
+    includeModules:
+      forceExclude:
+        - webpack
 
 provider:
   name: aws

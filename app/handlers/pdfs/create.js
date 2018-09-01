@@ -16,7 +16,7 @@ export const create = (event) => {
     .then(pdf.toPdfObj)
     .then(aws.uploadPdfObject)
     .then(result => response.ok(result))
-    .catch(err => errors.internalServer(err));
+    .catch((err) => { console.error(err); errors.internalServer(err); });
 };
 
 const handler = middy(create)

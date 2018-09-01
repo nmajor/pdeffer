@@ -1,11 +1,16 @@
 import fs from 'fs';
 import pdf from 'html-pdf';
+// import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
 
 import options from '../options';
 
 import * as download from './download';
+
+// function phantomPath() {
+//   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
+// }
 
 export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
@@ -53,7 +58,7 @@ function saveFile(file, buffer) {
 export function toBuffer(html) {
   return new Promise((resolve, reject) => {
     pdf.create(html, {
-      phantomPath: phantomPath(),
+      phantomPath: 'phantomjs',
       timeout: 120000,
       height: options.get().height,
       width: options.get().width,
@@ -115,7 +120,7 @@ export function addPageNumbers(pdfObj, startingPage, { destination = download.di
       .replace('RIGHT_MARGIN', options.get().margin);
 
     fs.writeFileSync(latexPath, latexText);
-    const command = `${pdfLatexPath()} -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
+    const command = `pdflatex -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
 
     const { spawn } = require('child_process'); // eslint-disable-line global-require
     const process = spawn('/bin/bash', [

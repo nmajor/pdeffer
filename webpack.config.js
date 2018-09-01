@@ -1,5 +1,8 @@
+const path = require('path');
 const slsw = require("serverless-webpack");
 const nodeExternals = require("webpack-node-externals");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const PermissionsOutputPlugin = require('webpack-permissions-plugin');
 
 module.exports = {
   entry: slsw.lib.entries,
@@ -28,6 +31,32 @@ module.exports = {
         exclude: /node_modules/
       }
     ]
-  }
+  },
+  plugins: [
+    new CopyWebpackPlugin([{
+      from: 'bin/',
+      to: 'bin/'
+    }]),
+    new PermissionsOutputPlugin({
+      // buildFolders: [{
+      //   path: path.resolve(__dirname, '.webpack/service/bin/'),
+      //   fileMode: '777',
+      //   dirMode: '777',
+      // }],
+      buildFiles: [
+        // {
+        //   path: path.resolve(__dirname, 'bin/phantomjs'),
+        //   fileMode: '755'
+        // },
+        {
+          path: path.resolve(__dirname, '.webpack/service/bin/phantomjs'),
+          fileMode: '755'
+        },
+        {
+          path: path.resolve(__dirname, '.webpack/service/bin/pdflatex'),
+          fileMode: '755'
+        },
+      ]
+    })
+  ]
 };
-
