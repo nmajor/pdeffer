@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import fs from 'fs';
 
-import { create as handler } from '../../../app/handlers/pdfs';
+import handler from '../../../app/handlers/pdfs/create';
 
 const sampleFile = `${__dirname}/../../samples/sample.html`;
 

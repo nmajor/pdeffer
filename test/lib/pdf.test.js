@@ -77,19 +77,19 @@ describe('lib/pdf.toPdfObj', () => {
   }).timeout(20000);
 });
 
-describe('lib/pdf.addPageNumbers', () => {
-  it('Add page numbers to a file', (done) => {
-    const staringPage = 5;
-    pdf.toPdfObj(samplePageTestFile)
-      .then(pdfObj => pdf.addPageNumbers(pdfObj, staringPage, { destination: resultsDirectory }))
-      .then((res) => {
-        expect(res.buffer).to.be.ok;
-        expect(res.buffer.byteLength).to.be.above(100);
-        expect(res.meta.pageCount).to.equal(1);
-        expect(res.meta.sha1).to.be.a('string');
-        expect(res.file).to.not.be.ok;
-        return done();
-      }).then(done)
-      .catch(done);
-  }).timeout(20000);
-});
+// describe('lib/pdf.addPageNumbers', () => {
+//   it('Add page numbers to a file', (done) => {
+//     const staringPage = 5;
+//     pdf.toPdfObj(samplePageTestFile)
+//       .then(pdfObj => pdf.addPageNumbers(pdfObj, staringPage, { destination: resultsDirectory }))
+//       .then((res) => {
+//         expect(res.buffer).to.be.ok;
+//         expect(res.buffer.byteLength).to.be.above(100);
+//         expect(res.meta.pageCount).to.equal(1);
+//         expect(res.meta.sha1).to.be.a('string');
+//         expect(res.file).to.not.be.ok;
+//         return done();
+//       }).then(done)
+//       .catch(done);
+//   }).timeout(20000);
+// });
