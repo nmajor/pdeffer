@@ -7,6 +7,7 @@ import * as aws from '../../lib/aws';
 import response from '../../lib/response';
 import errors from '../../lib/errors';
 import setOptions from '../../middlewares/setOptions';
+import setBinPath from '../../middlewares/setBinPath';
 
 export const create = (event) => {
   const { html } = event.body;
@@ -19,6 +20,7 @@ export const create = (event) => {
 };
 
 const handler = middy(create)
+  .use(setBinPath())
   .use(jsonBodyParser())
   .use(setOptions());
 

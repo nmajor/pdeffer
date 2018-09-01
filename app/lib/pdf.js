@@ -1,20 +1,11 @@
 import fs from 'fs';
 import pdf from 'html-pdf';
-import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
 
 import options from '../options';
 
 import * as download from './download';
-
-function phantomPath() {
-  return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
-}
-
-function pdfLatexPath() {
-  return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/pdflatex') : 'pdflatex';
-}
 
 export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
