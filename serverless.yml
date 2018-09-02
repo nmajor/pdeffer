@@ -8,7 +8,7 @@ plugins:
 
 package:
   include:
-    - bin/phantomjs
+    - bin/*
 
 # serverless-webpack configuration
 # Enable auto-packing of external modules
@@ -33,8 +33,7 @@ provider:
   iamRoleStatements:
     - Effect: "Allow"
       Action:
-       - "s3:PutObject"
-       - "s3:DeleteObject"
+       - "s3:*"
       Resource: { "Fn::Join": ["", ["arn:aws:s3:::pdf-shop-uploads", "/*" ] ] }
 
 functions:
@@ -50,7 +49,7 @@ functions:
       - http:
           path: api/pdf/add-page-numbers
           method: post
-  addGutterMargins:
+  pdfsAddGutterMargins:
     handler: app/handlers/pdfs/addGutterMargins.default
     events:
       - http:
