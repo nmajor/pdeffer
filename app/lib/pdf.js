@@ -1,16 +1,13 @@
+import _ from 'lodash';
 import fs from 'fs';
 import pdf from 'html-pdf';
-// import path from 'path';
+import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
 
 import options from '../options';
 
 import * as download from './download';
-
-// function phantomPath() {
-//   return process.env.LAMBDA_TASK_ROOT ? path.resolve(process.env.LAMBDA_TASK_ROOT, 'bin/phantomjs') : undefined;
-// }
 
 export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
@@ -39,10 +36,18 @@ export function metaFromBuffer(buffer) {
         ...meta,
         height,
         width,
-        heightIn: `${height / 72}in`,
-        widthIn: `${width / 72}in`,
+        heightIn: `${_.round((height / 72), 3)}in`,
+        widthIn: `${_.round((width / 72), 3)}in`,
       };
     });
+}
+
+export function metaFromFile(file) {
+  return new Promise((resolve, reject) => fs.readFile(file, (err, buffer) => {
+    if (err) reject(err);
+
+    return resolve(metaFromBuffer(buffer));
+  }));
 }
 
 function saveFile(file, buffer) {
@@ -82,14 +87,10 @@ export function toFile(html, file) {
 }
 
 export function toPdfObj(data) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (typeof data === 'string') {
-      return fs.readFile(data, (err, buffer) => {
-        if (err) reject(err);
-
-        return metaFromBuffer(buffer)
-          .then(meta => resolve({ file: data, meta }));
-      });
+      return metaFromFile(data)
+        .then(meta => resolve({ file: data, meta }));
     }
 
     return metaFromBuffer(data)
@@ -101,14 +102,16 @@ export function addPageNumbers(pdfObj, startingPage, { destination = download.di
   const latexTemplatePath = `${__dirname}/../../latex/page_numbering.tex`;
   const latexPath = `${destination}/page_numbering.tex`;
 
+  const filename = path.basename(pdfObj.file);
+
   let footerPosition = 'LO,RE';
-  if (pdfObj.pageCount % 2 === 0) {
+  if (options.get().prePagedPageCount % 2 === 0) {
     footerPosition = 'LE,RO';
   }
 
   return new Promise((resolve, reject) => {
     const latexTemplateText = fs.readFileSync(latexTemplatePath, 'utf8');
-    const newFile = pdfObj.file.replace(/\.pdf$/, '-paged');
+    const newFile = filename.replace(/\.pdf$/, '-paged');
 
     const latexText = latexTemplateText
       .replace('STARTING_PAGE', startingPage)
@@ -121,6 +124,7 @@ export function addPageNumbers(pdfObj, startingPage, { destination = download.di
 
     fs.writeFileSync(latexPath, latexText);
     const command = `pdflatex -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
+    console.log('blah hello command', command);
 
     const { spawn } = require('child_process'); // eslint-disable-line global-require
     const process = spawn('/bin/bash', [
@@ -134,12 +138,13 @@ export function addPageNumbers(pdfObj, startingPage, { destination = download.di
 
     process.on('close', (code) => {
       if (code === 0) {
-        resolve({ ...pdfObj, file: `${destination}/${newFile}.pdf` });
+        resolve(`${destination}/${newFile}.pdf`);
       } else {
         reject(new Error('pdflatex command failed'));
       }
     });
-  });
+  })
+    .then(toPdfObj);
 }
 
 export default null;

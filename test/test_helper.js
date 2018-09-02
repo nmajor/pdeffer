@@ -2,6 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import AWS from 'aws-sdk';
 
+import chai from 'chai';
+import chaiAlmost from 'chai-almost';
+
+chai.use(chaiAlmost(0.002));
+
 const bucket = 'pdf-shop-uploads';
 
 export function deleteTestObjects() {
