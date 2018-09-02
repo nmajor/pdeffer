@@ -1,13 +1,11 @@
 import _ from 'lodash';
 import fs from 'fs';
 import pdf from 'html-pdf';
-import path from 'path';
 import pdfjs from 'pdfjs-dist';
 import crypto from 'crypto';
 
 import options from '../options';
-
-import * as download from './download';
+import * as latex from './latex';
 
 export function bufferToSha1(buffer) {
   const hash = crypto.createHash('sha1');
@@ -98,52 +96,13 @@ export function toPdfObj(data) {
   });
 }
 
-export function addPageNumbers(pdfObj, startingPage, { destination = download.dir }) {
-  const latexTemplatePath = `${__dirname}/../../latex/page_numbering.tex`;
-  const latexPath = `${destination}/page_numbering.tex`;
+export function addPageNumbers(pdfObj) {
+  return latex.pageNumbering(pdfObj.file, pdfObj.meta)
+    .then(toPdfObj);
+}
 
-  const filename = path.basename(pdfObj.file);
-
-  let footerPosition = 'LO,RE';
-  if (options.get().prePagedPageCount % 2 === 0) {
-    footerPosition = 'LE,RO';
-  }
-
-  return new Promise((resolve, reject) => {
-    const latexTemplateText = fs.readFileSync(latexTemplatePath, 'utf8');
-    const newFile = filename.replace(/\.pdf$/, '-paged');
-
-    const latexText = latexTemplateText
-      .replace('STARTING_PAGE', startingPage)
-      .replace('FOOTER_POSITIONS', footerPosition)
-      .replace('PDF_PATH', pdfObj.file)
-      .replace('PDF_HEIGHT', pdfObj.meta.heightIn)
-      .replace('PDF_WIDTH', pdfObj.meta.widthIn)
-      .replace('LEFT_MARGIN', options.get().margin)
-      .replace('RIGHT_MARGIN', options.get().margin);
-
-    fs.writeFileSync(latexPath, latexText);
-    const command = `pdflatex -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
-    console.log('blah hello command', command);
-
-    const { spawn } = require('child_process'); // eslint-disable-line global-require
-    const process = spawn('/bin/bash', [
-      '-c',
-      command,
-    ]);
-
-    process.stderr.on('data', (data) => {
-      reject(new Error(data));
-    });
-
-    process.on('close', (code) => {
-      if (code === 0) {
-        resolve(`${destination}/${newFile}.pdf`);
-      } else {
-        reject(new Error('pdflatex command failed'));
-      }
-    });
-  })
+export function addBlankPage(pdfObj) {
+  return latex.appendBlankPage(pdfObj.file, pdfObj.meta)
     .then(toPdfObj);
 }
 

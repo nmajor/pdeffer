@@ -2,12 +2,13 @@ import fs from 'fs';
 import { expect } from 'chai';
 
 import * as pdf from '../../app/lib/pdf';
+import options from '../../app/options';
 
 const sampleHtmlFile = `${__dirname}/../samples/sample.html`;
 const samplePdfFile = `${__dirname}/../samples/sample.pdf`;
-const samplePageTestFile = `${__dirname}/../samples/page-test.pdf`;
+const sampleAddPageNumTestFile = `${__dirname}/../samples/add-page-numbers-test.pdf`;
+const sampleAddBlankPageFile = `${__dirname}/../samples/add-blank-page.pdf`;
 const resultFile = `${__dirname}/../results/create.pdf`;
-const resultsDirectory = `${__dirname}/../results`;
 
 describe('lib/pdf.toFile', () => {
   after((done) => {
@@ -79,17 +80,41 @@ describe('lib/pdf.toPdfObj', () => {
 
 describe('lib/pdf.addPageNumbers', () => {
   it('Add page numbers to a file', (done) => {
-    const startingPage = 5;
-    pdf.toPdfObj(samplePageTestFile)
+    options.set({ startingPage: 5 });
+
+    pdf.toPdfObj(sampleAddPageNumTestFile)
       .then(pdfObj => Promise.all([
         pdfObj,
-        pdf.addPageNumbers(pdfObj, startingPage, { destination: resultsDirectory }),
+        pdf.addPageNumbers(pdfObj),
       ]))
       .then((results) => {
         const [original, res] = results;
         expect(res.file).to.be.ok;
-        expect(res.file).to.not.equal(samplePageTestFile);
+        expect(res.file).to.not.equal(sampleAddPageNumTestFile);
         expect(res.meta.pageCount).to.equal(original.meta.pageCount);
+        expect(res.meta.height).to.almost.equal(original.meta.height);
+        expect(res.meta.width).to.almost.equal(original.meta.width);
+        expect(res.meta.sha1).to.not.equal(original.meta.sha1);
+        expect(res.meta.sha1).to.not.equal(original.meta.sha1);
+        return Promise.resolve();
+      })
+      .then(done)
+      .catch(done);
+  }).timeout(20000);
+});
+
+describe('lib/pdf.addBlankPage', () => {
+  it('Add a blank page to the end of a file', (done) => {
+    pdf.toPdfObj(sampleAddBlankPageFile)
+      .then(pdfObj => Promise.all([
+        pdfObj,
+        pdf.addBlankPage(pdfObj),
+      ]))
+      .then((results) => {
+        const [original, res] = results;
+        expect(res.file).to.be.ok;
+        expect(res.file).to.not.equal(sampleAddBlankPageFile);
+        expect(res.meta.pageCount).to.equal(original.meta.pageCount + 1);
         expect(res.meta.height).to.almost.equal(original.meta.height);
         expect(res.meta.width).to.almost.equal(original.meta.width);
         expect(res.meta.sha1).to.not.equal(original.meta.sha1);
