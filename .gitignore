@@ -49,6 +49,7 @@ env.yml
 .env
 
 tmp/*
+test/results/*
 
 # Jetbrains IDEs
 .idea

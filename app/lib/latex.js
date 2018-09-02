@@ -6,7 +6,7 @@ import options from '../options';
 function swapText(text, map) {
   let result = text;
   _.forEach(map, (value, key) => {
-    result = result.replace(key, value);
+    result = result.replace(new RegExp(key, 'g'), value);
   });
   return result;
 }
@@ -19,32 +19,26 @@ function getDestination() {
   return `${__dirname}/../../tmp`;
 }
 
-function buildTexFile({
-  destination,
-  template,
-  templateValues,
-}) {
-  const templateFilename = path.basename(template);
-  const templateText = fs.readFileSync(template, 'utf8');
-
-  const latexText = swapText(templateText, templateValues);
-  const latexPath = `${destination}/${templateFilename}`;
-
-  fs.writeFileSync(latexPath, latexText);
-
-  return latexPath;
-}
-
 function runPdflatex(props) {
   const {
     source,
     destination,
+    template,
+    templateValues,
   } = props;
 
   return new Promise((resolve, reject) => {
-    const latexPath = buildTexFile(props);
+    const templateFilename = path.basename(template);
+    const templateSuffix = templateFilename.replace(/\.tex/, '');
+    const templateText = fs.readFileSync(template, 'utf8');
+
+    const latexText = swapText(templateText, templateValues);
+    const latexPath = `${destination}/${templateFilename}`;
+
+    fs.writeFileSync(latexPath, latexText);
+
     const filename = path.basename(source);
-    const newFile = filename.replace(/\.pdf$/, '-paged');
+    const newFile = filename.replace(/\.pdf$/, `-${templateSuffix}`);
     const command = `pdflatex -jobname="${newFile}" -output-directory="${destination}" ${latexPath}`;
 
     const { spawn } = require('child_process'); // eslint-disable-line global-require
@@ -103,6 +97,26 @@ export function appendBlankPage(file, settings) {
     destination,
     template,
     templateValues: {
+      PDF_PATH: file,
+      PDF_HEIGHT: settings.heightIn,
+      PDF_WIDTH: settings.widthIn,
+    },
+  });
+}
+
+export function gutterMargins(file, settings) {
+  const destination = getDestination();
+
+  const template = `${__dirname}/../../latex/gutter_margins.tex`;
+  const gutterMatches = options.get().gutterMargins.match(/(\d*)([a-zA-Z]*)/);
+  const adjustedGutter = (gutterMatches[1] / 2) + gutterMatches[2];
+
+  return runPdflatex({
+    source: file,
+    destination,
+    template,
+    templateValues: {
+      GUTTER_MARGIN: adjustedGutter,
       PDF_PATH: file,
       PDF_HEIGHT: settings.heightIn,
       PDF_WIDTH: settings.widthIn,

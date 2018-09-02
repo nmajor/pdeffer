@@ -10,6 +10,10 @@ let _options = { // eslint-disable-line no-underscore-dangle
 
   // Starting page number for page numbering
   startingPage: 1,
+
+  // Gutter margins: This is cut in half in emailgate-docker-worker lib. I dont know why.
+  // Setting as a full 4mm and cutting in half in lib/latex
+  gutterMargins: '4mm',
 };
 
 export default {

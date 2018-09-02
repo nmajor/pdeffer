@@ -106,4 +106,9 @@ export function addBlankPage(pdfObj) {
     .then(toPdfObj);
 }
 
+export function addGutterMargins(pdfObj) {
+  return latex.gutterMargins(pdfObj.file, pdfObj.meta)
+    .then(toPdfObj);
+}
+
 export default null;

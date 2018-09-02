@@ -4,26 +4,18 @@ import { expect } from 'chai';
 import * as pdf from '../../app/lib/pdf';
 import options from '../../app/options';
 
-const sampleHtmlFile = `${__dirname}/../samples/sample.html`;
-const samplePdfFile = `${__dirname}/../samples/sample.pdf`;
-const sampleAddPageNumTestFile = `${__dirname}/../samples/add-page-numbers-test.pdf`;
-const sampleAddBlankPageFile = `${__dirname}/../samples/add-blank-page.pdf`;
-const resultFile = `${__dirname}/../results/create.pdf`;
+const samplePdf = `${__dirname}/../samples/sample.pdf`;
+const sampleHtml = `${__dirname}/../samples/sample.html`;
+const resultsPath = `${__dirname}/../results`;
 
 describe('lib/pdf.toFile', () => {
-  after((done) => {
-    try {
-      fs.unlinkSync(resultFile);
-    } finally { done(); }
-  });
-
   it('builds a pdf FILE', (done) => {
-    expect(fs.existsSync(resultFile)).to.not.be.ok;
+    expect(fs.existsSync(`${resultsPath}/pdf-to-file.pdf`)).to.not.be.ok;
 
-    fs.readFile(sampleHtmlFile, 'utf8', (err, text) => {
+    fs.readFile(sampleHtml, 'utf8', (err, text) => {
       if (err) throw Error(err);
 
-      return pdf.toFile(text, resultFile, {})
+      return pdf.toFile(text, `${resultsPath}/pdf-to-file.pdf`, {})
         .then((res) => {
           expect(fs.existsSync(res)).to.be.ok;
           return done();
@@ -34,7 +26,7 @@ describe('lib/pdf.toFile', () => {
 
 describe('lib/pdf.toBuffer', () => {
   it('builds a pdf BUFFER', (done) => {
-    fs.readFile(sampleHtmlFile, 'utf8', (err, text) => {
+    fs.readFile(sampleHtml, 'utf8', (err, text) => {
       if (err) throw Error(err);
 
       return pdf.toBuffer(text, {})
@@ -48,7 +40,7 @@ describe('lib/pdf.toBuffer', () => {
 
 describe('lib/pdf.toPdfObj', () => {
   it('builds pdfObj from buffer', (done) => {
-    fs.readFile(samplePdfFile, (err, buffer) => {
+    fs.readFile(samplePdf, (err, buffer) => {
       if (err) throw Error(err);
 
       return pdf.toPdfObj(buffer)
@@ -65,10 +57,10 @@ describe('lib/pdf.toPdfObj', () => {
   }).timeout(20000);
 
   it('builds pdfObj from filepath', (done) => {
-    pdf.toPdfObj(samplePdfFile)
+    pdf.toPdfObj(samplePdf)
       .then((res) => {
         expect(res.file).to.be.ok;
-        expect(res.file).to.equal(samplePdfFile);
+        expect(res.file).to.equal(samplePdf);
         expect(res.meta.pageCount).to.equal(1);
         expect(res.meta.sha1).to.be.a('string');
         expect(res.meta.size).to.be.above(100);
@@ -80,9 +72,13 @@ describe('lib/pdf.toPdfObj', () => {
 
 describe('lib/pdf.addPageNumbers', () => {
   it('Add page numbers to a file', (done) => {
+    const testFile = `${resultsPath}/pdf.pdf`;
+    const testBuffer = fs.readFileSync(samplePdf);
+    fs.writeFileSync(testFile, testBuffer);
+
     options.set({ startingPage: 5 });
 
-    pdf.toPdfObj(sampleAddPageNumTestFile)
+    pdf.toPdfObj(testFile)
       .then(pdfObj => Promise.all([
         pdfObj,
         pdf.addPageNumbers(pdfObj),
@@ -90,7 +86,7 @@ describe('lib/pdf.addPageNumbers', () => {
       .then((results) => {
         const [original, res] = results;
         expect(res.file).to.be.ok;
-        expect(res.file).to.not.equal(sampleAddPageNumTestFile);
+        expect(res.file).to.not.equal(testFile);
         expect(res.meta.pageCount).to.equal(original.meta.pageCount);
         expect(res.meta.height).to.almost.equal(original.meta.height);
         expect(res.meta.width).to.almost.equal(original.meta.width);
@@ -105,7 +101,11 @@ describe('lib/pdf.addPageNumbers', () => {
 
 describe('lib/pdf.addBlankPage', () => {
   it('Add a blank page to the end of a file', (done) => {
-    pdf.toPdfObj(sampleAddBlankPageFile)
+    const testFile = `${resultsPath}/pdf.pdf`;
+    const testBuffer = fs.readFileSync(samplePdf);
+    fs.writeFileSync(testFile, testBuffer);
+
+    pdf.toPdfObj(testFile)
       .then(pdfObj => Promise.all([
         pdfObj,
         pdf.addBlankPage(pdfObj),
@@ -113,8 +113,35 @@ describe('lib/pdf.addBlankPage', () => {
       .then((results) => {
         const [original, res] = results;
         expect(res.file).to.be.ok;
-        expect(res.file).to.not.equal(sampleAddBlankPageFile);
+        expect(res.file).to.not.equal(testFile);
         expect(res.meta.pageCount).to.equal(original.meta.pageCount + 1);
+        expect(res.meta.height).to.almost.equal(original.meta.height);
+        expect(res.meta.width).to.almost.equal(original.meta.width);
+        expect(res.meta.sha1).to.not.equal(original.meta.sha1);
+        expect(res.meta.sha1).to.not.equal(original.meta.sha1);
+        return Promise.resolve();
+      })
+      .then(done)
+      .catch(done);
+  }).timeout(20000);
+});
+
+describe('lib/pdf.addGutterMargins', () => {
+  it('Add a blank page to the end of a file', (done) => {
+    const testFile = `${resultsPath}/pdf.pdf`;
+    const testBuffer = fs.readFileSync(samplePdf);
+    fs.writeFileSync(testFile, testBuffer);
+
+    pdf.toPdfObj(testFile)
+      .then(pdfObj => Promise.all([
+        pdfObj,
+        pdf.addGutterMargins(pdfObj),
+      ]))
+      .then((results) => {
+        const [original, res] = results;
+        expect(res.file).to.be.ok;
+        expect(res.file).to.not.equal(testFile);
+        expect(res.meta.pageCount).to.equal(original.meta.pageCount);
         expect(res.meta.height).to.almost.equal(original.meta.height);
         expect(res.meta.width).to.almost.equal(original.meta.width);
         expect(res.meta.sha1).to.not.equal(original.meta.sha1);
